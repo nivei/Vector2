@@ -53,6 +53,13 @@ class Vector2:
     def dist(self, vec):
         v = self - vec
         return v.length()
+    
+    def rotate(self, angle):
+        cash_x = self.xy[0]
+        cs = math.cos(angle)
+        sn = math.sin(angle)
+        self.xy[0] = cs * cash_x - sn * self.xy[1]
+        self.xy[1] = sn * cash_x + cs * self.xy[1]
 
     def normalize(self):
         vec_length = self.length()
