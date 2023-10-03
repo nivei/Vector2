@@ -3,115 +3,166 @@ from typing import Union
 import math
 import random
 
-class Vec2d:
-    def __init__(self, x: float, y: float):
-        self.xy = [x, y]
-        
-    def __add__(self, other: Union[float, Vec2d]) -> Vec2d:
-        if isinstance(other, self.__class__):
-            return Vec2d(self.xy[0] + other.xy[0], self.xy[1] + other.xy[1])
-        return Vec2d(self.xy[0] + other, self.xy[1] + other)
 
-    def __sub__(self, other: Union[float, Vec2d]) -> Vec2d:
-        if isinstance(other, self.__class__):
-            return Vec2d(self.xy[0] - other.xy[0], self.xy[1] - other.xy[1])
-        return Vec2d(self.xy[0] - other, self.xy[1] - other)
+class Vector:
+    def __init__(self, x: float, y: float) -> None:
+        self.__x = x
+        self.__y = y
 
-    def __mul__(self, other: Union[float, Vec2d]) -> Vec2d:
-        if isinstance(other, self.__class__):
-            return Vec2d(self.xy[0] * other.xy[0], self.xy[1] * other.xy[1])
-        return Vec2d(self.xy[0] * other, self.xy[1] * other)
+    def __str__(self) -> str:
+        return f'Vector<{self.x}, {self.y}> object at {hex(id(self))}'
 
-    def __rmul__(self, other: Union[float, Vec2d]) -> Vec2d:
+    @property
+    def x(self) -> float:
+        return self.__x
+
+    @x.setter
+    def x(self, val: float) -> None:
+        self.__x = val
+
+    @property
+    def y(self) -> float:
+        return self.__y
+
+    @y.setter
+    def y(self, val: float) -> None:
+        self.__y = val
+
+    @property
+    def xy(self) -> tuple:
+        return self.__x, self.__y
+
+    @xy.setter
+    def xy(self, other: Union[Vector, iter, float]) -> None:
+        if isinstance(other, self.__class__):
+            self.__x = other.x
+            self.__y = other.y
+        elif hasattr(other, '__iter__'):
+            self.__x = other[0]
+            self.__y = other[1]
+        else:
+            self.__x = other
+            self.__y = other
+
+    def __add__(self, other: Union[float, Vector]) -> Vector:
+        if isinstance(other, self.__class__):
+            return Vector(self.x + other.x, self.y + other.y)
+        return Vector(self.x + other, self.y + other)
+
+    def __sub__(self, other: Union[float, Vector]) -> Vector:
+        if isinstance(other, self.__class__):
+            return Vector(self.x - other.x, self.y - other.y)
+        return Vector(self.x - other, self.y - other)
+
+    def __mul__(self, other: Union[float, Vector]) -> Vector:
+        if isinstance(other, self.__class__):
+            return Vector(self.x * other.x, self.y * other.y)
+        return Vector(self.x * other, self.y * other)
+
+    def __rmul__(self, other: Union[float, Vector]) -> Vector:
         return self.__mul__(other)
 
-    def __truediv__(self, other: Union[float, Vec2d]) -> Vec2d:
+    def __truediv__(self, other: Union[float, Vector]) -> Vector:
         if isinstance(other, self.__class__):
-            if other.xy[0] != 0 and other.xy[1] != 0:
-                return Vec2d(self.xy[0] / other.xy[0], self.xy[1] / other.xy[1])
-        if other.xy[0] != 0 and other.xy[1] != 0:
-            return Vec2d(self.xy[0] / other, self.xy[1] / other)
-        return Vec2d(0, 0)
+            if other.x != 0 and other.y != 0:
+                return Vector(self.x / other.x, self.y / other.y)
+        if other.x != 0 and other.y != 0:
+            return Vector(self.x / other, self.y / other)
+        return Vector(0, 0)
 
-    def __eq__(self, other: Union[float, Vec2d]) -> bool:
+    def __eq__(self, other: Union[float, Vector]) -> bool:
         if isinstance(other, self.__class__):
-            return self.xy[0] == other.xy[0] and self.xy[1] == other.xy[1]
-        return self.xy[0] == other and self.xy[1] == other
+            return self.x == other.x and self.y == other.y
+        return self.x == other and self.y == other
 
-    def __neg__(self) -> Vec2d:
-        return Vec2d(-self.xy[0], -self.xy[1])
+    def __neg__(self) -> Vector:
+        return Vector(-self.x, -self.y)
 
     def length_sqr(self) -> float:
-        return self.xy[0] ** 2 + self.xy[1] ** 2
+        return self.x ** 2 + self.y ** 2
 
     def length(self) -> float:
         return math.sqrt(self.length_sqr())
 
-    def dist_sqr(self, vec: Vec2d) -> float:
+    def distance_sqr(self, vec: Vector) -> float:
         v = self - vec
         return v.length_sqr()
 
-    def dist(self, vec: Vec2d) -> float:
+    def distance(self, vec: Vector) -> float:
         v = self - vec
         return v.length()
 
     def rotate(self, angle: float) -> None:
-        cash_x = self.xy[0]
+        cash_x = self.x
+        cs = math.cos(math.radians(angle))
+        sn = math.sin(math.radians(angle))
+        self.x = cs * cash_x - sn * self.y
+        self.y = sn * cash_x + cs * self.y
+
+    def rotate_rad(self, angle: float) -> None:
+        cash_x = self.x
         cs = math.cos(angle)
         sn = math.sin(angle)
-        self.xy[0] = cs * cash_x - sn * self.xy[1]
-        self.xy[1] = sn * cash_x + cs * self.xy[1]
+        self.x = cs * cash_x - sn * self.y
+        self.y = sn * cash_x + cs * self.y
 
     def normalize(self) -> None:
         vec_length = self.length()
 
         if vec_length < 0.00001:
-            self.xy = [0, 1]
-
+            self.xy = 0, 1
         else:
-            self.xy = [self.xy[0] / vec_length, self.xy[1] / vec_length]
+            self.xy = self.x / vec_length, self.y / vec_length
+
+    def normalize_ip(self) -> Vector:
+        vec_length = self.length()
+
+        if vec_length < 0.00001:
+            return Vector(0, 1)
+        return Vector(self.x / vec_length, self.y / vec_length)
 
     def scale_to_length(self, length: float) -> None:
         self.normalize()
-        self *= length
+        self.x *= length
+        self.y *= length
 
     def make_int_tuple(self) -> tuple[int, int]:
-        return int(self.xy[0]), int(self.xy[1])
+        return int(self.x), int(self.y)
 
-    def set(self, vec: Vec2d) -> None:
-        self.xy[0] = vec.xy[0]
-        self.xy[1] = vec.xy[1]
-
-def dot(vec1: Vec2d, vec2: Vec2d) -> float:
-    return vec1.xy[0] * vec2.xy[0] + vec1.xy[1] * vec2.xy[1]
+    def set(self, vec: Vector) -> None:
+        self.x = vec.x
+        self.y = vec.y
 
 
-def angle_between(vec1: Vec2d, vec2: Vec2d) -> float:
+def dot(vec1: Vector, vec2: Vector) -> float:
+    return vec1.x * vec2.x + vec1.y * vec2.y
+
+
+def angle_between(vec1: Vector, vec2: Vector) -> float:
     return math.acos(dot(vec1, vec2))
 
 
-def right(vec: Vec2d) -> Vec2d:
-    return Vec2d(-vec.xy[1], vec.xy[0])
+def right(vec: Vector) -> Vector:
+    return Vector(-vec.y, vec.x)
 
 
-def left(vec: Vec2d) -> Vec2d:
+def left(vec: Vector) -> Vector:
     return -right(vec)
 
 
-def random_vector() -> Vec2d:
-    return Vec2d(random.random() * 2.0 - 1.0, random.random() * 2.0 - 1.0)
+def random_vector() -> Vector:
+    return Vector(random.random() * 2.0 - 1.0, random.random() * 2.0 - 1.0)
 
 
-def vector_from_angle(angle: float) -> Vec2d:
-    return Vec2d(math.cos(angle), math.sin(angle))
+def vector_from_angle(angle: float) -> Vector:
+    return Vector(math.cos(angle), math.sin(angle))
 
 
-def random_direction() -> Vec2d:
+def random_direction() -> Vector:
     vec = random_vector()
     vec.normalize()
     return vec
 
 
-def copy(vec: Vec2d) -> Vec2d:
-    return Vec2d(vec.xy[0], vec.xy[1])
-                 
+def copy(vec: Vector) -> Vector:
+    return Vector(vec.x, vec.y)
