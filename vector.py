@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
-import math
-import random
+from math import sqrt, sin, cos, radians, acos
+from random import random
 
 
 class Vector:
@@ -82,7 +82,7 @@ class Vector:
         return self.x ** 2 + self.y ** 2
 
     def length(self) -> float:
-        return math.sqrt(self.length_sqr())
+        return sqrt(self.length_sqr())
 
     def distance_sqr(self, vec: Vector) -> float:
         v = self - vec
@@ -94,15 +94,15 @@ class Vector:
 
     def rotate(self, angle: float) -> None:
         cash_x = self.x
-        cs = math.cos(math.radians(angle))
-        sn = math.sin(math.radians(angle))
+        cs = cos(radians(angle))
+        sn = sin(radians(angle))
         self.x = cs * cash_x - sn * self.y
         self.y = sn * cash_x + cs * self.y
 
     def rotate_rad(self, angle: float) -> None:
         cash_x = self.x
-        cs = math.cos(angle)
-        sn = math.sin(angle)
+        cs = cos(angle)
+        sn = sin(angle)
         self.x = cs * cash_x - sn * self.y
         self.y = sn * cash_x + cs * self.y
 
@@ -139,7 +139,7 @@ def dot(vec1: Vector, vec2: Vector) -> float:
 
 
 def angle_between(vec1: Vector, vec2: Vector) -> float:
-    return math.acos(dot(vec1, vec2))
+    return acos(dot(vec1, vec2))
 
 
 def right(vec: Vector) -> Vector:
@@ -151,11 +151,11 @@ def left(vec: Vector) -> Vector:
 
 
 def random_vector() -> Vector:
-    return Vector(random.random() * 2.0 - 1.0, random.random() * 2.0 - 1.0)
+    return Vector(random() * 2.0 - 1.0, random() * 2.0 - 1.0)
 
 
 def vector_from_angle(angle: float) -> Vector:
-    return Vector(math.cos(angle), math.sin(angle))
+    return Vector(cos(angle), sin(angle))
 
 
 def random_direction() -> Vector:
@@ -166,3 +166,4 @@ def random_direction() -> Vector:
 
 def copy(vec: Vector) -> Vector:
     return Vector(vec.x, vec.y)
+
